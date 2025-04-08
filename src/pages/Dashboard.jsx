@@ -10,13 +10,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Trash2 } from "lucide-react";
+import { Trash2, CheckCircle2, Clock } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "focusflow-tasks";
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [newTaskText, setNewTaskText] = useState("");
+  const [filterState, setFilterState] = useState("all"); // 'all', 'active', or 'completed'
 
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -33,6 +34,7 @@ export default function Dashboard() {
       id: Date.now(),
       text: newTaskText.trim(),
       done: false,
+      createdAt: new Date().toISOString(),
     };
     setTasks([newTask, ...tasks]);
     setNewTaskText("");
@@ -46,96 +48,165 @@ export default function Dashboard() {
     setTasks(tasks.filter((t) => t.id !== taskId));
   };
 
+  const filteredTasks = tasks.filter(task => {
+    if (filterState === "all") return true;
+    if (filterState === "active") return !task.done;
+    if (filterState === "completed") return task.done;
+    return true;
+  });
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="w-full px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto space-y-6"
+      style={{ minHeight: "100vh", padding: "2rem 0" }}
     >
-      <div className="space-y-1 text-center sm:text-left">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-500">
-          Welcome back 👋
+      <div className="space-y-1">
+        <h2 className="text-3xl font-extrabold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+          FocusFlow
         </h2>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Here's what’s happening today.
+        <p className="text-muted-foreground text-sm">
+          Track your tasks, boost your productivity
         </p>
       </div>
 
       {/* Add Task */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Input
-          placeholder="Add a new task..."
-          value={newTaskText}
-          onChange={(e) => setNewTaskText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTask()}
-          className="w-full"
-        />
+      <Card className="overflow-hidden shadow-lg border-0">
+        <CardContent className="p-4">
+          <div className="flex gap-3">
+            <Input
+              placeholder="What needs to be done?"
+              value={newTaskText}
+              onChange={(e) => setNewTaskText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addTask()}
+              className="w-full rounded-lg"
+            />
+            <Button
+              onClick={addTask}
+              className="transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md rounded-lg"
+            >
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Filter Tabs */}
+      <div className="flex justify-center sm:justify-start gap-2">
         <Button
-          onClick={addTask}
-          className="w-full sm:w-auto transition-all duration-300 hover:scale-105 bg-brand-500 text-white shadow-md"
+          variant={filterState === "all" ? "default" : "outline"}
+          onClick={() => setFilterState("all")}
+          className="rounded-full text-sm"
         >
-          Add
+          All
+        </Button>
+        <Button
+          variant={filterState === "active" ? "default" : "outline"}
+          onClick={() => setFilterState("active")}
+          className="rounded-full text-sm"
+        >
+          Active
+        </Button>
+        <Button
+          variant={filterState === "completed" ? "default" : "outline"}
+          onClick={() => setFilterState("completed")}
+          className="rounded-full text-sm"
+        >
+          Completed
         </Button>
       </div>
 
       {/* Task List */}
-      {tasks.length === 0 ? (
-        <p className="text-muted-foreground text-sm text-center">
-          No tasks for today. 🎉
-        </p>
+      {filteredTasks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <CheckCircle2 size={48} className="text-gray-300 mb-4" />
+          <p className="text-lg font-medium">
+            {filterState === "all" 
+              ? "Your task list is empty" 
+              : filterState === "active" 
+                ? "No active tasks" 
+                : "No completed tasks"}
+          </p>
+          <p className="text-muted-foreground text-sm mt-1">
+            {filterState === "all" ? "Add a new task to get started" : ""}
+          </p>
+        </div>
       ) : (
         <div className="space-y-3">
           <AnimatePresence>
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <motion.div
                 key={task.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="hover:shadow-lg transition-all duration-300">
-                  <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 py-3 px-4">
-                    <motion.div
-                      className="flex items-start sm:items-center gap-3"
-                      whileHover={{ scale: 1.01 }}
-                    >
-                      <motion.div
-                        whileTap={{ scale: 0.9 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <Checkbox
-                          checked={task.done}
-                          onCheckedChange={() => toggleDone(task.id)}
-                        />
-                      </motion.div>
-                      <span
-                        className={`text-sm break-words max-w-[90%] ${
-                          task.done
-                            ? "line-through text-muted-foreground"
-                            : "text-foreground"
-                        }`}
-                      >
-                        {task.text}
-                      </span>
-                    </motion.div>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-red-500 hover:text-red-700 transition-all"
-                            onClick={() => deleteTask(task.id)}
+                <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-0">
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        <motion.div
+                          whileTap={{ scale: 0.9 }}
+                          transition={{ type: "spring", stiffness: 400 }}
+                        >
+                          <Checkbox
+                            checked={task.done}
+                            onCheckedChange={() => toggleDone(task.id)}
+                            className={task.done ? "bg-green-500 border-green-500" : ""}
+                          />
+                        </motion.div>
+                        <div className="flex flex-col">
+                          <span
+                            className={`text-base break-words ${
+                              task.done
+                                ? "line-through text-muted-foreground"
+                                : ""
+                            }`}
                           >
-                            <Trash2 size={16} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete Task</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                            {task.text}
+                          </span>
+                          {task.createdAt && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Clock size={12} />
+                              {formatDate(task.createdAt)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 transition-all rounded-full"
+                              onClick={() => deleteTask(task.id)}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete Task</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    {task.done && (
+                      <div className="h-1 bg-gradient-to-r from-green-400 to-green-500" />
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -143,6 +214,23 @@ export default function Dashboard() {
           </AnimatePresence>
         </div>
       )}
+
+      {/* Stats Footer */}
+      <div className="flex justify-between items-center text-sm text-muted-foreground mt-4 pt-4 border-t">
+        <div>
+          {tasks.filter(t => !t.done).length} tasks remaining
+        </div>
+        {tasks.length > 0 && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setTasks(tasks.filter(t => !t.done))}
+            className="text-red-500 hover:text-red-700"
+          >
+            Clear completed
+          </Button>
+        )}
+      </div>
     </motion.div>
   );
 }
