@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Notebook, Tags, Settings, AlarmClock, Timer, Share2 } from "lucide-react";
-import { cn } from "@/lib/utils"; // ShadCN's util (already generated)
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", icon: <Home size={18} />, label: "Dashboard" },
@@ -12,13 +12,15 @@ const navItems = [
   { to: "/settings", icon: <Settings size={18} />, label: "Settings" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ className }) {
   const location = useLocation();
 
   return (
-    <aside className="w-64 h-screen border-r p-4 bg-gradient-to-b from-brand-100 via-white to-brand-50 shadow-lg">
-    <h2 className="text-2xl font-bold mb-6 text-brand-700">🧠 FocusFlow</h2>
-  
+    <aside className={cn(
+      "w-64 h-full border-r p-4 bg-gradient-to-b from-brand-100 via-white to-brand-50 shadow-lg",
+      className
+    )}>
+      <h2 className="text-2xl font-bold mb-6 text-brand-700">🧠 FocusFlow</h2>
       <nav className="flex flex-col gap-2">
         {navItems.map(({ to, icon, label }) => (
           <Link

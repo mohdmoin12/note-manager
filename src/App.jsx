@@ -8,18 +8,33 @@ import Share from "./pages/Share";
 import Settings from "./pages/Settings";
 
 import Sidebar from "./components/layout/Sidebar";
-import Header from "./components/layout/Header"; // ✅ Import Header
+import Header from "./components/layout/Header";
+import MobileSidebar from "./components/layout/MobileSidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="focusflow-theme">
       <BrowserRouter>
-        <div className="flex flex-col h-screen">
-          <Header /> {/* ✅ Top Header */}
-          <div className="flex flex-1 overflow-hidden">
+        <div className="flex h-screen overflow-hidden">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block">
             <Sidebar />
-            <div className="flex-1 p-4 overflow-y-auto bg-muted/10">
+          </div>
+
+          {/* Mobile Header + Sidebar */}
+          <div className="lg:hidden fixed top-0 left-0 right-0 z-50">
+            <MobileSidebar />
+          </div>
+
+          {/* Content Area */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Header only visible on desktop */}
+            <div className="hidden lg:block">
+              <Header />
+            </div>
+
+            <main className="flex-1 overflow-y-auto px-4 pt-16 lg:pt-4 bg-muted/10">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/notes" element={<Notes />} />
@@ -29,7 +44,7 @@ function App() {
                 <Route path="/share" element={<Share />} />
                 <Route path="/settings" element={<Settings />} />
               </Routes>
-            </div>
+            </main>
           </div>
         </div>
       </BrowserRouter>

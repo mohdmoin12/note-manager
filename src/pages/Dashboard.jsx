@@ -51,24 +51,29 @@ export default function Dashboard() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-xl mx-auto px-4 space-y-6"
+      className="w-full px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto space-y-6"
     >
-      <div className="space-y-1">
-        <h2 className="text-3xl font-extrabold text-brand-500">Welcome back 👋</h2>
-        <p className="text-muted-foreground">Here's what’s happening today.</p>
+      <div className="space-y-1 text-center sm:text-left">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-500">
+          Welcome back 👋
+        </h2>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Here's what’s happening today.
+        </p>
       </div>
 
       {/* Add Task */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-3">
         <Input
           placeholder="Add a new task..."
           value={newTaskText}
           onChange={(e) => setNewTaskText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addTask()}
+          className="w-full"
         />
         <Button
           onClick={addTask}
-          className="transition-all duration-300 hover:scale-105 bg-brand-500 text-white shadow-md"
+          className="w-full sm:w-auto transition-all duration-300 hover:scale-105 bg-brand-500 text-white shadow-md"
         >
           Add
         </Button>
@@ -76,7 +81,9 @@ export default function Dashboard() {
 
       {/* Task List */}
       {tasks.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No tasks for today. 🎉</p>
+        <p className="text-muted-foreground text-sm text-center">
+          No tasks for today. 🎉
+        </p>
       ) : (
         <div className="space-y-3">
           <AnimatePresence>
@@ -89,9 +96,9 @@ export default function Dashboard() {
                 transition={{ duration: 0.3 }}
               >
                 <Card className="hover:shadow-lg transition-all duration-300">
-                  <CardContent className="flex items-center justify-between py-3 px-4">
+                  <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 py-3 px-4">
                     <motion.div
-                      className="flex items-center gap-3"
+                      className="flex items-start sm:items-center gap-3"
                       whileHover={{ scale: 1.01 }}
                     >
                       <motion.div
@@ -104,7 +111,7 @@ export default function Dashboard() {
                         />
                       </motion.div>
                       <span
-                        className={`text-sm ${
+                        className={`text-sm break-words max-w-[90%] ${
                           task.done
                             ? "line-through text-muted-foreground"
                             : "text-foreground"

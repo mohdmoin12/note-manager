@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
     name: "John Doe",
-    darkMode: false,
+    darkMode: theme === "dark",
   });
+
+  useEffect(() => {
+    setTheme(settings.darkMode ? "dark" : "light");
+  }, [settings.darkMode, setTheme]);
 
   const handleSave = () => {
     console.log("Saved settings:", settings);
